@@ -1,0 +1,25 @@
+(1) run plotCR.cc to generate Z+X shapes;
+(2) copy files to vbf folder and make the merging of the generated files running combineOS*;
+(3) run plotObjectsProperties.cc to generate Data and remaining BKGs shapes and, create a file including them and Z+X;
+(3) copy the Histograms.root file locally;
+(4) run plot3rdJetUncertainty.cc to generate the ANN shapes for each channel in the Njets3 category from VBF-H2J and VBF-H3J, getting their ratio (= to the uncertainty)
+(5) run checkUnc1Sigma*.cc to generate all process and their +/- 1sigma shifts (first set of files used in the limits procedure);
+(6) merge the generated files (hadd Distribution*.root)
+(7) run create_datacards.sh, which calls the genInputs*.py creating the *.txt and *.root datacards needed for limits;
+(8) run combine_cards.sh to combine the cards using combine tool;
+(9) run Limits:
+  (9.1) Best fit: combine ./../combinedCard_Higgs125GeV_VBFStudy_k57nj2_k24nj3_4l.txt -M FitDiagnostics --plots --saveOverallShapes --saveWithUncertainties >& combineResults.log
+  (9.2) Best fits: combine ./../combinedCard_Higgs125GeV_VBFStudy_k57nj2_k24nj3_4l.txt -M ChannelCompatibilityCheck --saveFitResult >& combineResults.log
+  (9.3) Obs Likelihood: combine ./../combinedCard_Higgs125GeV_VBFStudy_k57nj2_k24nj3_4l.txt -M MultiDimFit -n Obs --algo=grid --points 300 >& combineResults.log
+  (9.4) Exp Likelihood: combine ./../combinedCard_Higgs125GeV_VBFStudy_k57nj2_k24nj3_4l.txt -M MultiDimFit -n Exp --algo=grid --points 300 -t -1 --expectSignal=1 >& combineResults.log
+  (9.5) Impact plot:
+    text2workspace.py ../combinedCard_Higgs125GeV_VBFStudy_k57nj2_k24nj3_4l.txt -m 125
+    python combineTool.py -M Impacts -d ../combinedCard_Higgs125GeV_VBFStudy_k57nj2_k24nj3_4l.root -m 125 --doInitialFit --robustFit 1
+    python combineTool.py -M Impacts -d ../combinedCard_Higgs125GeV_VBFStudy_k57nj2_k24nj3_4l.root -m 125 --robustFit 1 --doFits
+    python combineTool.py -M Impacts -d ../combinedCard_Higgs125GeV_VBFStudy_k57nj2_k24nj3_4l.root -m 125 -o impacts_obs_4l_k57nj2_k24nj3.json
+    python plotImpacts.py -i impacts_obs_4l_k57nj2_k24nj3.json -o impacts_obs_4l_k57nj2_k24nj3
+  (9.6) ExpHybridLimMedian: combine ./../combinedCard_Higgs125GeV_VBFStudy_k57nj2_k24nj3_4l.txt -M HybridNew --LHCmode LHC-limits -H AsymptoticLimits -T 50000 --expectedFromGrid=0.5 --expectSignal=1 >& combineResults.log
+  (9.7) ExpHybridLimObs: combine ./../combinedCard_Higgs125GeV_VBFStudy_k57nj2_k24nj3_4l.txt -M HybridNew --LHCmode LHC-limits -H AsymptoticLimits -T 50000 >& combineResults.log
+  (9.8) ExpHybridSigMedian: combine ./../combinedCard_Higgs125GeV_VBFStudy_k57nj2_k24nj3_4l.txt -M HybridNew --LHCmode LHC-significance -H Significance -T 50000 --expectedFromGrid=0.5 --expectSignal=1 >& combineResults.log
+  (9.9) ObsHybridSigMedian: combine ./../combinedCard_Higgs125GeV_VBFStudy_k57nj2_k24nj3_4l.txt -M HybridNew --LHCmode LHC-significance -H Significance -T 50000 >& combineResults.log
+  
