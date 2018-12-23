@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2015/dev/Debian) (preloaded format=pdflatex 2018.12.14)  23 DEC 2018 16:27
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2015/dev/Debian) (preloaded format=pdflatex 2018.12.14)  23 DEC 2018 16:57
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -574,42 +574,42 @@ F.sh
  []
 
 [4] [5] [6]
-<figs/3jets_pt_eta_phi_no_weight_vbf_vs_all_leptons_sorting_issue.png, id=81, 3
+<figs/3jets_pt_eta_phi_no_weight_vbf_vs_all_leptons_sorting_issue.png, id=83, 3
 86.94562pt x 374.14781pt>
 File: figs/3jets_pt_eta_phi_no_weight_vbf_vs_all_leptons_sorting_issue.png Grap
 hic file (type png)
 
 <use figs/3jets_pt_eta_phi_no_weight_vbf_vs_all_leptons_sorting_issue.png>
 Package pdftex.def Info: figs/3jets_pt_eta_phi_no_weight_vbf_vs_all_leptons_sor
-ting_issue.png used on input line 168.
+ting_issue.png used on input line 170.
 (pdftex.def)             Requested size: 150.14671pt x 145.18059pt.
 
-<figs/3jets_pt_eta_phi_weight_sum_vbf_vs_all_leptons_sorting_issue.png, id=82, 
+<figs/3jets_pt_eta_phi_weight_sum_vbf_vs_all_leptons_sorting_issue.png, id=84, 
 386.94562pt x 374.90062pt>
 File: figs/3jets_pt_eta_phi_weight_sum_vbf_vs_all_leptons_sorting_issue.png Gra
 phic file (type png)
 
 <use figs/3jets_pt_eta_phi_weight_sum_vbf_vs_all_leptons_sorting_issue.png>
 Package pdftex.def Info: figs/3jets_pt_eta_phi_weight_sum_vbf_vs_all_leptons_so
-rting_issue.png used on input line 171.
+rting_issue.png used on input line 173.
 (pdftex.def)             Requested size: 150.14671pt x 145.4727pt.
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 176.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 178.
 
 [7 <./figs/3jets_pt_eta_phi_no_weight_vbf_vs_all_leptons_sorting_issue.png> <./
 figs/3jets_pt_eta_phi_weight_sum_vbf_vs_all_leptons_sorting_issue.png>]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 176.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 178.
 
 (./guide.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 176.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 176.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 178.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 178.
 Package rerunfilecheck Info: File `guide.out' has not changed.
 (rerunfilecheck)             Checksum: 659C9EAF1C3FF7C5C814AC384E066495;367.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 176.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 178.
  ) 
 Here is how much of TeX's memory you used:
  8564 strings out of 494397
  128732 string characters out of 6167008
- 267115 words of memory out of 5000000
+ 266115 words of memory out of 5000000
  11749 multiletter control sequences out of 15000+600000
  10875 words of font info for 74 fonts, out of 8000000 for 9000
  308 hyphenation exceptions out of 8191
@@ -626,10 +626,10 @@ sfonts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/c
 m/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10
 .pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb><
 /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on guide.pdf (9 pages, 423780 bytes).
+Output written on guide.pdf (9 pages, 426147 bytes).
 PDF statistics:
- 137 PDF objects out of 1000 (max. 8388607)
- 107 compressed objects within 2 object streams
+ 139 PDF objects out of 1000 (max. 8388607)
+ 109 compressed objects within 2 object streams
  17 named destinations out of 1000 (max. 500000)
  12861 words of extra memory for PDF output out of 14400 (max. 10000000)
 
