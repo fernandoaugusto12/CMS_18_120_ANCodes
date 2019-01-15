@@ -67,29 +67,33 @@ def FormatInputs(list_of_files, output_file, tags, keys, Nevents, Njets, MaxSubj
         ##ZX special selection
         if(file_name.find('ZplusX') != -1 and evt.f_2p2p):
 	  continue
+
+        event = {}
         
         #gets the sum of weights
         event_index[imc] += 1
         if(file_name.find('ZplusX') == -1):
 	  mc_sumweight[imc] += evt.f_weight
+          event['f_weight'] =  evt.f_weight
+
 	else:
 	  f1=0
 	  f2=0
 	  f3=0
 	  f4=0
-	  if(abs(f_lept1_pdgid)==11):
+	  if(abs(evt.f_lept1_pdgid)==11):
 	    f1 = elefrw.GetBinContent( elefrw.FindBin(evt.f_lept1_pt,abs(evt.f_lept1_eta)) )
 	  else:
 	    f1 = mufrw.GetBinContent( mufrw.FindBin(evt.f_lept1_pt,abs(evt.f_lept1_eta)) )
-	  if(abs(f_lept2_pdgid)==11):
+	  if(abs(evt.f_lept2_pdgid)==11):
 	    f2 = elefrw.GetBinContent( elefrw.FindBin(evt.f_lept2_pt,abs(evt.f_lept2_eta)) )
 	  else:
 	    f2 = mufrw.GetBinContent( mufrw.FindBin(evt.f_lept2_pt,abs(evt.f_lept2_eta)) )
-	  if(abs(f_lept3_pdgid)==11):
+	  if(abs(evt.f_lept3_pdgid)==11):
 	    f3 = elefrw.GetBinContent( elefrw.FindBin(evt.f_lept3_pt,abs(evt.f_lept3_eta)) )
 	  else:
 	    f3 = mufrw.GetBinContent( mufrw.FindBin(evt.f_lept3_pt,abs(evt.f_lept3_eta)) )
-	  if(abs(f_lept4_pdgid)==11):
+	  if(abs(evt.f_lept4_pdgid)==11):
 	    f4 = elefrw.GetBinContent( elefrw.FindBin(evt.f_lept4_pt,abs(evt.f_lept4_eta)) )
 	  else:
 	    f4 = mufrw.GetBinContent( mufrw.FindBin(evt.f_lept4_pt,abs(evt.f_lept4_eta)) )
@@ -104,12 +108,13 @@ def FormatInputs(list_of_files, output_file, tags, keys, Nevents, Njets, MaxSubj
 	  if not evt.f_lept4_pass:
 	    fr_weight *= f4/(1-f4);
 	  
-	  mc_sumweight[imc] += fr_weight
+	  mc_sumweight[imc] =  5.08
+          event['f_weight'] =  fr_weight
 	  
 	if(event_index[imc] > Nevents):
           break;
 
-        event = {}
+        #event = {}
         event['mc'] =  imc
         if(file_name.find('histos4mu') != -1):
             event['final_state'] =  '4mu'
@@ -120,8 +125,8 @@ def FormatInputs(list_of_files, output_file, tags, keys, Nevents, Njets, MaxSubj
 
 	#event['f_outlier'] =  evt.f_outlier
 	event['mc_sumweight'] = 0 
-	event['f_weight'] =  evt.f_weight
-	#event['f_Djet_VAJHU'] =  evt.f_Djet_VAJHU
+	#event['f_weight'] =  evt.f_weight
+	event['f_Djet_VAJHU'] =  evt.f_Djet_VAJHU
 	#event['f_Djet_VAJHU_UncUp'] =  evt.f_Djet_VAJHU_UncUp
 	#event['f_Djet_VAJHU_UncDn'] =  evt.f_Djet_VAJHU_UncDn
 	event['f_lept1_pt'] =  evt.f_lept1_pt
@@ -189,7 +194,7 @@ def FormatInputs(list_of_files, output_file, tags, keys, Nevents, Njets, MaxSubj
 	#event['f_mT'] =  evt.f_mT
 	#event['f_dphi'] =  evt.f_dphi
 	event['f_nbjets'] =  evt.f_Nbjets
-	for ijet in range(Njets):
+	for ijet in range(3):#Njets):
 	  check = evt.f_jets_highpt_pt[ijet]
 	  #event['f_jets_highpt_btagger[%i]' % ijet] =  (evt.f_jets_highpt_btagger[ijet]  if (check != -999) else default_value)
 	  event['f_jets_highpt_pt[%i]' % ijet] =  (evt.f_jets_highpt_pt[ijet]  if (check != -999) else default_value)
