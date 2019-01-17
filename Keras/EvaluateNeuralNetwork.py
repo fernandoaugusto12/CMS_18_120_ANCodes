@@ -6,17 +6,18 @@
 ###------------------------------------------------------------------------------------###
 
 #set adequate environment
-import os
-import sys
+print "Starting run... importing env variables"
+#import os
+#import sys
 import argparse
-import theano
-import keras
-theano.config.gcc.cxxflags = '-march=corei7'
+#import theano
+#import keras
+#theano.config.device = 'cpu'
 
 #load needed things
 from keras.models import Sequential, Model
 from keras.optimizers import SGD, Adam, Adagrad, Adadelta, RMSprop
-from keras.layers import Input, Activation, Dense
+from keras.layers import Input, Activation, Dense, Dropout
 from keras.utils import np_utils
 from keras.wrappers.scikit_learn import KerasClassifier
 from keras.callbacks import EarlyStopping, ModelCheckpoint, LearningRateScheduler
@@ -36,6 +37,7 @@ import math
 import ROOT
 import cPickle as pickle
 
+print "Python libraries imported..."
 
 # fix random seed for reproducibility
 seed = 7
@@ -99,6 +101,18 @@ def prepareSets(events, split_factor, use_vars, use_mcs, signal, nooutliers, aug
       fweights['train'].append( events[iev]['f_weight'] )
       fscales['train'].append( events[iev]['mc_sumweight'] )
       fmela['train'].append( events[iev]['f_Djet_VAJHU'] )
+      if(augmentation != -1):
+	rd = ROOT.TRandom3()
+        for iaug in range(augmentation):
+	  vvars = []
+	  for ivar in use_vars:
+	    kf = rd.Gaus(1,0.1)
+	    vvars.append( kf*events[iev][ivar] )
+	  finputs['train'].append( vvars )
+	  flabels['train'].append( (1 if ik in signal else 0) )
+	  fweights['train'].append( events[iev]['f_weight'] )
+	  fscales['train'].append( events[iev]['mc_sumweight'] )
+	  fmela['train'].append( events[iev]['f_Djet_VAJHU'] )
     #---- fills the testing set -----
     else:
       ntest += 1
@@ -113,23 +127,6 @@ def prepareSets(events, split_factor, use_vars, use_mcs, signal, nooutliers, aug
       fscales['test'].append( events[iev]['mc_sumweight'] )
       fmela['test'].append( events[iev]['f_Djet_VAJHU'] )
     
-
-  if(augmentation != -1):
-    rd = ROOT.TRandom3()
-    ntrains = len(flabels['train'])
-    for iaug in range(1,augmentation+1):
-      print 'Augmenting %ix' % iaug
-      for iev in range(ntrains):
-	vvars = []
-	for ivar in range(len(use_vars)):
-	  kf = rd.Gaus(1,0.1)
-	  svar = kf*finputs['train'][iev][ivar]	  
-	  vvars.append( svar )
-	finputs['train'].append( vvars )
-	flabels['train'].append( flabels['train'][iev] )
-	fweights['train'].append( fweights['train'][iev] )
-	fscales['train'].append( fscales['train'][iev] )
-	fmela['train'].append( fmela['train'][iev] )
     
   for iset in ['train','test']:
     print ">>> Size of",iset," set  = ",len(finputs[iset])
@@ -147,11 +144,19 @@ def prepareSets(events, split_factor, use_vars, use_mcs, signal, nooutliers, aug
   return d_inputs, d_labels, d_mela, d_weights, d_scales
 
 
+#### learning rate schedule
+def step_decay(epoch):
+	initial_lrate = 0.1
+	drop = 0.5
+	epochs_drop = 1000
+	lrate = initial_lrate * math.pow(drop, math.floor((1+epoch)/epochs_drop))
+	return lrate
+
 
 ####---------------------------------------------------------------------------------------------------------------------###
 ####                                  MAIN FUNCTION - BUILDS AND TRAIN NEURAL NETWORK
 ####------------------------------------------- Build, Train and Test NN ------------------------------------------------###
-def TrainNeuralNetwork(filein_name, results_folder, use_mcs, signal, use_vars, split_factor, pre_proc, layers, neuron, nepochs, wait_for, sbatch, opt, scale_train, nooutliers, augmentation):
+def TrainNeuralNetwork(filein_name, results_folder, use_mcs, signal, use_vars, split_factor, pre_proc, layers, drops, neuron, nepochs, wait_for, sbatch, opt, scale_train, nooutliers, augmentation):
   #### creates a dictionary to hold informations
   outdict = {}
   outdict['infile'] = filein_name
@@ -159,6 +164,7 @@ def TrainNeuralNetwork(filein_name, results_folder, use_mcs, signal, use_vars, s
   outdict['nninputs'] = use_vars
   outdict['split'] = split_factor
   outdict['topology'] = layers
+  outdict['dropout'] = drops
   outdict['neuron'] = neuron
   outdict['epochs'] = nepochs
   outdict['patience'] = wait_for
@@ -169,8 +175,8 @@ def TrainNeuralNetwork(filein_name, results_folder, use_mcs, signal, use_vars, s
   outdict['mcs'] = use_mcs
 
   print '>>>>> Results will be saved there: ',results_folder
-  if not os.path.isdir(results_folder):
-    os.mkdir(results_folder)
+  #if not os.path.isdir(results_folder):
+  #  os.mkdir(results_folder)
   
   print "Loading file: ",filein_name
   filein = open(filein_name,'r')
@@ -231,8 +237,12 @@ def TrainNeuralNetwork(filein_name, results_folder, use_mcs, signal, use_vars, s
   model = Sequential()
   model.add(Dense(layers[0], input_shape=(ninputs,), activation=neuron[0], kernel_initializer='random_uniform'))
   for ilayer in range(1,len(layers)):
+    if drops != None:
+      model.add(Dropout(drops[ilayer]))
     model.add(Dense(layers[ilayer], activation=neuron[0], kernel_initializer='random_uniform'))
-  model.add(Dense(1, activation='sigmoid', kernel_initializer='random_uniform'))    
+  if drops != None:
+    model.add(Dropout(drops[len(drops)-1]))
+  model.add(Dense(1, activation='sigmoid', kernel_initializer='random_uniform'))
   
   if(opt[0] == 'sgd'):
     model.compile(loss='binary_crossentropy', optimizer=SGD(), metrics=['accuracy'])
@@ -247,21 +257,23 @@ def TrainNeuralNetwork(filein_name, results_folder, use_mcs, signal, use_vars, s
     
   print model.summary()
 
-  filepath=results_folder+"/best_model.h5"
+  filepath="best_model.h5"
   checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=0, save_best_only=True, mode='auto')
   early_stopping = EarlyStopping(monitor='val_loss', patience=wait_for)
+  # learning schedule callback
+  lrate = LearningRateScheduler(step_decay)
 
   #train the DNN
   history = []
   if(scale_train[0] == 'none'):
     history = model.fit(X['train'],Y['train'],validation_data=(X['test'],Y['test']),
-			epochs=nepochs,batch_size=sbatch,verbose=2,callbacks=[checkpoint, early_stopping])    
+			epochs=nepochs,batch_size=sbatch,verbose=2,callbacks=[checkpoint, early_stopping, lrate])    
   if(scale_train[0] == 'mc_weight'):
     history = model.fit(X['train'],Y['train'],sample_weight=scales['train'],validation_data=(X['test'],Y['test'],scales['test']),
-			epochs=nepochs,batch_size=sbatch,verbose=2,callbacks=[checkpoint, early_stopping])
+			epochs=nepochs,batch_size=sbatch,verbose=2,callbacks=[checkpoint, early_stopping, lrate])
   if(scale_train[0] == 'event_weight'):
     history = model.fit(X['train'],Y['train'],sample_weight=weights['train'],validation_data=(X['test'],Y['test'],weights['test']), 
-                         epochs=nepochs,batch_size=sbatch,verbose=2,callbacks=[checkpoint, early_stopping])
+                        epochs=nepochs,batch_size=sbatch,verbose=2,callbacks=[checkpoint, early_stopping, lrate])
 			
 
   print ''
@@ -276,7 +288,7 @@ def TrainNeuralNetwork(filein_name, results_folder, use_mcs, signal, use_vars, s
   pyp.legend()
   pyp.xlabel('epoch')
   pyp.grid(True)
-  pyp.savefig(results_folder+"/TrainingHistoryLoss.png")
+  pyp.savefig("TrainingHistoryLoss.png")
 
   # load final best weights
   model.load_weights(filepath)
@@ -328,7 +340,7 @@ def TrainNeuralNetwork(filein_name, results_folder, use_mcs, signal, use_vars, s
   pyp.legend(loc="lower right")
   pyp.grid(True)
   #pyp.show()
-  pyp.savefig(results_folder+"/FinalTrainTestROCs.png")
+  pyp.savefig("FinalTrainTestROCs.png")
 
 
   mela_sb = {}
@@ -444,7 +456,7 @@ def TrainNeuralNetwork(filein_name, results_folder, use_mcs, signal, use_vars, s
 
   pyp.tight_layout()
   #fig = pyp.show()
-  pyp.savefig(results_folder+'/ComparisonMCsMetrics.png')
+  pyp.savefig('ComparisonMCsMetrics.png')
 
   ##### ---------------- Cross checking for overfitting ------------------ ####
   pyp.rc("font", size=16)
@@ -482,9 +494,9 @@ def TrainNeuralNetwork(filein_name, results_folder, use_mcs, signal, use_vars, s
   pyp.xlim([-0.01,1.01])
   pyp.legend()
   pyp.xlabel('MELA')
-  pyp.savefig(results_folder+'/MELAOvertrainingCheck.png')
+  pyp.savefig('MELAOvertrainingCheck.png')
   pyp.gca().set_yscale("log")
-  pyp.savefig(results_folder+'/MELAOvertrainingCheck_logy.png')
+  pyp.savefig('MELAOvertrainingCheck_logy.png')
 
 
   #--------------- DNN plots ----------------------
@@ -520,9 +532,9 @@ def TrainNeuralNetwork(filein_name, results_folder, use_mcs, signal, use_vars, s
   pyp.xlim([-0.01,1.01])
   pyp.legend()
   pyp.xlabel('NN')
-  pyp.savefig(results_folder+'/NNOvertrainingCheck.png')
+  pyp.savefig('NNOvertrainingCheck.png')
   pyp.gca().set_yscale("log")
-  pyp.savefig(results_folder+'/NNOvertrainingCheck_logy.png')
+  pyp.savefig('NNOvertrainingCheck_logy.png')
 
 
   #creates normalized ROCs separated by MC
@@ -581,11 +593,11 @@ def TrainNeuralNetwork(filein_name, results_folder, use_mcs, signal, use_vars, s
   pyp.legend(loc="lower right")
   pyp.grid(True)
   #pyp.show()
-  pyp.savefig(results_folder+'/ComparisonMCsROC.png')
+  pyp.savefig('ComparisonMCsROC.png')
   
   
   print 'Saving dictionary with summary of results...'
-  fileout = open(results_folder+'/SummaryOfResults.pkl','w')
+  fileout = open('SummaryOfResults.pkl','w')
   pickle.dump( outdict, fileout )
   fileout.close()
 ###--------------------------------------------------------------------------------------------------------------###
@@ -622,6 +634,7 @@ def main(options):
   print 'split: ', options.split  
   print 'preproc: ', options.preproc
   print 'topology: ', options.topology
+  print 'dropout: ', options.dropout
   print 'neuron: ', options.neuron
   print 'nepochs: ', options.nepochs
   print 'patience: ', options.patience
@@ -643,6 +656,7 @@ def main(options):
 		     options.split,
 		     options.preproc,
 		     options.topology,
+                     options.dropout,
 		     options.neuron,
 		     options.nepochs,
 		     options.patience,
@@ -670,6 +684,7 @@ if __name__ == '__main__':
  parser.add_argument("--split", type=float, default=0.5, help="Fraction of each MC to be used for train (the remaining is used for test)")
  parser.add_argument("--preproc", action="append", help="Pre-processing of inputs: none, normalize or scale")
  parser.add_argument("--topology", type=int, nargs='+', help="The topology of the NN. Ex: 21:13:8, a NN with 3 hidden layers")
+ parser.add_argument("--dropout", type=float, nargs='+', help="The dropout to be used - acting only on hidden layers")
  parser.add_argument("--neuron", action="append", help="The type of neuron to be used: relu, sigmod or tanh")
  parser.add_argument("--nepochs", type=int, default=1000, help="Number of epochs to train")
  parser.add_argument("--patience", type=int, default=100, help="Number of epochs to wait without improvement before stop training")
