@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2015/dev/Debian) (preloaded format=pdflatex 2018.12.14)  23 DEC 2018 17:30
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2015/dev/Debian) (preloaded format=pdflatex 2018.12.14)  20 JAN 2019 16:47
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -607,11 +607,11 @@ Package rerunfilecheck Info: File `guide.out' has not changed.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 178.
  ) 
 Here is how much of TeX's memory you used:
- 8562 strings out of 494397
- 128716 string characters out of 6167008
+ 8560 strings out of 494397
+ 128700 string characters out of 6167008
  266115 words of memory out of 5000000
  11749 multiletter control sequences out of 15000+600000
- 10824 words of font info for 73 fonts, out of 8000000 for 9000
+ 10773 words of font info for 72 fonts, out of 8000000 for 9000
  308 hyphenation exceptions out of 8191
  30i,9n,36p,1595b,394s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></us
@@ -626,7 +626,7 @@ sfonts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/c
 m/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10
 .pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb><
 /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on guide.pdf (9 pages, 427535 bytes).
+Output written on guide.pdf (9 pages, 427398 bytes).
 PDF statistics:
  139 PDF objects out of 1000 (max. 8388607)
  109 compressed objects within 2 object streams
